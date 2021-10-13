@@ -4,7 +4,6 @@ import (
 	"VOgRPC/types"
 	gosocketio "github.com/ambelovsky/gosf-socketio"
 	"github.com/ambelovsky/gosf-socketio/transport"
-	"github.com/gorilla/mux"
 	"log"
 )
 
@@ -13,9 +12,8 @@ type room struct {
 }
 
 type wsServer struct {
-	srvMux *mux.Router
-	srv    *gosocketio.Server
-	rooms  map[string]*room // roomID to room
+	srv   *gosocketio.Server
+	rooms map[string]*room // roomID to room
 }
 
 func (wss *wsServer) Init() {
@@ -52,10 +50,13 @@ func (wss *wsServer) Init() {
 	})
 }
 
+func (s *wsServer) GetPathHandler() *gosocketio.Server {
+	return s.srv
+}
+
 // NewWSServer constructs a new websocket server
-func NewWSServer(router *mux.Router) *wsServer {
+func NewWSServer() *wsServer {
 	srv := gosocketio.NewServer(transport.GetDefaultWebsocketTransport())
-	router.Handle("/socket.io/", srv)
-	s := &wsServer{srv: srv, rooms: map[string]*room{}, srvMux: router}
+	s := &wsServer{srv: srv, rooms: map[string]*room{}}
 	return s
 }

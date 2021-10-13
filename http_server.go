@@ -19,12 +19,13 @@ type server struct {
 func NewServer(r *mux.Router) *server {
 	return &server{
 		router:   r,
-		wsServer: NewWSServer(r),
+		wsServer: NewWSServer(),
 	}
 }
 
 // Init initializes the endpoints for the backend
 func (s *server) Init() {
+	router.Handle("/socket.io/", s.wsServer.GetPathHandler())
 	s.wsServer.Init()
 	/* static file server should be initialized last */
 	fs := http.FileServer(http.Dir("./static/"))
