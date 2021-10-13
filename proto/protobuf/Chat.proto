@@ -1,0 +1,23 @@
+syntax = "proto3";
+
+option go_package = "./proto";
+
+message Empty {
+
+}
+
+message VoiceMessage {
+  repeated int32 data = 1;
+  string sender = 2;
+  string roomID = 3;
+}
+
+message SubscriptionRequest {
+  string roomID = 1;
+}
+
+
+service ChatService {
+  rpc Subscribe(SubscriptionRequest) returns (stream VoiceMessage);
+  rpc SendVoiceMessage(VoiceMessage) returns (Empty);
+}
