@@ -34,7 +34,6 @@ func (s *server) Init() {
 
 // Start works with a sync.WaitGroup in order to support concurrency in later releases
 func (s *server) Start(wg *sync.WaitGroup) {
-	os.Setenv("PORT", "3000")
 	wg.Add(1)
 	// start the server
 	logger.Println("Listening on : " + os.Getenv("PORT"))

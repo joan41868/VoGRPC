@@ -5,6 +5,7 @@ import (
 	gosocketio "github.com/ambelovsky/gosf-socketio"
 	"github.com/ambelovsky/gosf-socketio/transport"
 	"log"
+	"time"
 )
 
 type room struct {
@@ -17,12 +18,20 @@ type wsServer struct {
 }
 
 func (wss *wsServer) Init() {
-	wss.srv.On(gosocketio.OnConnection, func(ch *gosocketio.Channel) {
-		ch.Join(ch.Id()) // join self room
+	go wss.cleanup()
+
+	err := wss.srv.On(gosocketio.OnConnection, func(ch *gosocketio.Channel) {
+		err := ch.Join(ch.Id()) // join own room
+		if err != nil {
+			log.Println(err)
+		}
 	})
+	if err != nil {
+		log.Println(err)
+	}
 
 	// subscribe to a given room in order to receive voice messages
-	wss.srv.On("subscribe", func(ch *gosocketio.Channel, sr *types.SubscriptionRequest) {
+	err = wss.srv.On("subscribe", func(ch *gosocketio.Channel, sr *types.SubscriptionRequest) {
 		log.Println("Subscription req for ", sr.RoomID, " by ", sr.Sender)
 		r, isRoomPresent := wss.rooms[sr.RoomID]
 		if isRoomPresent {
@@ -36,9 +45,12 @@ func (wss *wsServer) Init() {
 			wss.rooms[sr.RoomID] = r
 		}
 	})
+	if err != nil {
+		log.Println(err)
+	}
 
 	// send a voice message to a specific room
-	wss.srv.On("sendVoiceMessage", func(ch *gosocketio.Channel, vm *types.VoiceMessageCreateRequest) *types.VoiceMessageCreateRequest {
+	err = wss.srv.On("sendVoiceMessage", func(ch *gosocketio.Channel, vm *types.VoiceMessageCreateRequest) {
 		log.Println("Received voice message from ", vm.Sender, " for room ", vm.RoomID)
 		r, isPresent := wss.rooms[vm.RoomID]
 		if isPresent {
@@ -46,12 +58,30 @@ func (wss *wsServer) Init() {
 				wss.srv.BroadcastTo(channel.Id(), "receiveVoiceMessage", vm)
 			}
 		}
-		return vm
 	})
+	if err != nil {
+		log.Println(err)
+	}
 }
 
-func (s *wsServer) GetPathHandler() *gosocketio.Server {
-	return s.srv
+func (wss *wsServer) GetPathHandler() *gosocketio.Server {
+	return wss.srv
+}
+
+func (wss *wsServer) cleanup() {
+	for {
+		for key, r := range wss.rooms {
+			if len(r.Connections) == 0 {
+				delete(wss.rooms, key)
+			}
+			for connKey, conn := range r.Connections {
+				if !conn.IsAlive() {
+					delete(r.Connections, connKey)
+				}
+			}
+		}
+		time.Sleep(time.Hour)
+	}
 }
 
 // NewWSServer constructs a new websocket server
