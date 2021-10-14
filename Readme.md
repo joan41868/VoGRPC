@@ -10,6 +10,7 @@ A small WS and gRPC server, designed to support voice messaging.
 - [ ] Database design
 - [ ] Support for gRPC message transmitting
 - [ ] Unit and e2e test coverage
+- [ ] `Envoy` proxy
 - [ ] Deployment (BE)
 - [ ] Web Client (FE)
 - [ ] Desktop Client (FE)
