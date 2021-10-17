@@ -50,6 +50,8 @@ func (wss *wsServer) onConnection(ch *gosocketio.Channel) {
 func (wss *wsServer) onSubscribe(ch *gosocketio.Channel, sr *types.SubscriptionRequest) {
 	log.Println("Subscription req for ", sr.RoomID, " by ", sr.Sender)
 	r, isRoomPresent := wss.rooms[sr.RoomID]
+	ch.Join(sr.RoomID)
+	ch.Join(ch.Id())
 	if isRoomPresent {
 		// always update the connection when re-subscribing
 		r.Connections[sr.Sender] = ch
