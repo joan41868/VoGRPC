@@ -1,4 +1,4 @@
-module VOgRPC
+module vogrpc
 
 go 1.16
 // +heroku goVersion 1.16

@@ -1,11 +1,11 @@
 package main
 
 import (
-	"VOgRPC/types"
 	gosocketio "github.com/ambelovsky/gosf-socketio"
 	"github.com/ambelovsky/gosf-socketio/transport"
 	"log"
 	"time"
+	"vogrpc/types"
 )
 
 type room struct {
