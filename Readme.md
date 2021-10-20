@@ -11,7 +11,7 @@ A small WS and gRPC server, designed to support voice messaging.
 - [ ] Support for gRPC message transmitting
 - [ ] Unit and e2e test coverage
 - [ ] `Proxy` server implementation - socket -> gRPC and vice versa
-- [ ] Deployment (BE)
-- [ ] Web Client (FE)
+- [x] Deployment (BE)
+- [x] Web Client (FE)
 - [ ] Desktop Client (FE)
 - [ ] Mobile Client (FE)
