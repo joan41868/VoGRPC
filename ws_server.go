@@ -50,17 +50,25 @@ func (wss *wsServer) onConnection(ch *gosocketio.Channel) {
 func (wss *wsServer) onSubscribe(ch *gosocketio.Channel, sr *types.SubscriptionRequest) {
 	log.Println("Subscription req for ", sr.RoomID, " by ", sr.Sender)
 	r, isRoomPresent := wss.rooms[sr.RoomID]
-	ch.Join(sr.RoomID)
-	ch.Join(ch.Id())
 	if isRoomPresent {
+		if r.Connections[sr.Sender] == nil {
+			r.Connections[sr.Sender] = ch
+		} else {
+			logger.Println("a user with the same name exists in the given room. aborting..")
+			wss.srv.BroadcastTo(ch.Id(), "error", "user exists in room")
+			return
+		}
 		// always update the connection when re-subscribing
-		r.Connections[sr.Sender] = ch
+		ch.Join(sr.RoomID)
+		ch.Join(ch.Id())
 	} else {
 		r = &room{
 			Connections: map[string]*gosocketio.Channel{},
 		}
 		r.Connections[sr.Sender] = ch
 		wss.rooms[sr.RoomID] = r
+		ch.Join(sr.RoomID)
+		ch.Join(ch.Id())
 	}
 }
 
